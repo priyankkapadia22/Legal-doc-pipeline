@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LexiScan - Case Explorer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #eef2f3, #ffffff);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .main {
+      display: flex;
+      flex: 1;
+      padding: 2rem;
+      gap: 2rem;
+    }
+
+    .sidebar {
+      width: 300px;
+      background-color: #f9fbfc;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .sidebar input {
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .sidebar button {
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 1rem;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover {
+      background-color: #2980b9;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .case {
+      background-color: white;
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease;
+    }
+
+    .case:hover {
+      transform: scale(1.02);
+    }
+
+    .case strong {
+      color: #2c3e50;
+    }
+
+    .message {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header>LexiScan - Case Explorer</header>
+  <div class="main">
+    <div class="sidebar">
+      <input type="text" id="search" placeholder="Search by party name">
+      <button onclick="searchCases()">Search</button>
+    </div>
+    <div class="content" id="cases"></div>
+  </div>
+
+  <script>
+    function searchCases() {
+      const query = document.getElementById('search').value.trim();
+      const container = document.getElementById('cases');
+      container.innerHTML = '<p class="message">Loading cases...</p>';
+
+      fetch(`/api/cases?party=${encodeURIComponent(query)}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then(data => {
+          container.innerHTML = '';
+          if (data.length === 0) {
+            container.innerHTML = `<p class="message">No cases found for "${query}".</p>`;
+          } else {
+            data.forEach(row => {
+              container.innerHTML += `
+                <div class="case">
+                  <strong>Party:</strong> ${row.party}<br>
+                  <strong>Case #:</strong> ${row.case_number || 'N/A'}<br>
+                  <strong>Date:</strong> ${row.date}<br><br>
+                  <strong>Summary:</strong><br> ${row.summary}<br><br>
+                </div>
+              `;
+            });
+          }
+        })
+        .catch(err => {
+          container.innerHTML = '<p class="message">Error loading cases.</p>';
+          console.error('Fetch error:', err);
+        });
+    }
+
+    window.onload = () => {
+      document.getElementById('search').value = 'Wipro';
+      searchCases();
+    };
+  </script>
+</body>
+</html>
