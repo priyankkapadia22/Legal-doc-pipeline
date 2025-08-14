@@ -6,4 +6,8 @@ This project scrapes legal PDFs, extracts and translates text, stores metadata i
 
 ```bash
 pip install requests beautifulsoup4 pdfplumber langdetect deep-translator
+
 npm install express sqlite3
+
+DEMO:
+[![Watch Video] (Screenshots/Demo.mp4)]
